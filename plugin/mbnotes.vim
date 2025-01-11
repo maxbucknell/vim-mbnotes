@@ -41,6 +41,10 @@ if !exists("g:mbnotes_date_format_long")
     g:mbnotes_date_format_long = "%A, %-e %B %Y"
 endif
 
+if !exists("g:mbnotes_rename_on_save")
+    g:mbnotes_rename_on_save = 1
+endif
+
 import autoload 'mbnotes.vim'
 
 augroup MBNotes

@@ -64,7 +64,7 @@ export def BeforeNoteSave()
     var daily_path = g:mbnotes_dir .. "/daily"
 
     # Don't touch daily notes
-    if daily_path != full_path[0 : len(daily_path) - 1]
+    if g:mbnotes_rename_on_save && daily_path != full_path[0 : len(daily_path) - 1]
         var base = expand('%:t')
         var date = base[0 : 9]
 

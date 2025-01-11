@@ -130,6 +130,14 @@ If none of the above are defined, and this variable is not set explicitly, then
 the render commands (e.g. |:MBNotesRenderPDF|) will not open the output file
 after rendering.
 
+g:mbnotes_rename_on_save                          *g:mbnotes_rename_on_save*
+
+This plugin will attempt to intelligently rename a note based on its title,
+which is the first H1 that it finds in the document. Disable this behaviour by
+setting this variable to false >vim
+
+    let g:mbnotes_rename_on_save = 0
+
 ==============================================================================
 4. Commands                                               *mbnotes-commands*
 

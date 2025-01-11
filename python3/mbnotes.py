@@ -27,6 +27,4 @@ def generate_daily_note(date_offset = 0):
     date_format = vim.eval("g:mbnotes_date_format_long")
     date = date.strftime(date_format)
 
-    author = vim.eval("g:mbnotes_author")
-
-    return daily_template.substitute(date=date, author=author)
+    return daily_template.substitute(date=date)
