@@ -1,0 +1,206 @@
+*mbnotes.txt* Max Bucknell's notes framework
+
+==============================================================================
+1. Contents                                               *mbnotes-contents*
+
+    1. Introduction ...................... |mbnotes|
+    2. Setup ............................. |mbnotes-setup|
+    3. Configuration ..................... |mbnotes-config|
+    4. Commands .......................... |mbnotes-commands|
+    5. Front Matter ...................... |mbnotes-front-matter|
+
+==============================================================================
+1. Introduction                                                    *mbnotes*
+
+At the start of 2025, I started to use Vim for my digital notes, aiming to
+combine all of the features I liked from the various tools I had used over the
+years. This included:
+
+* Markdown
+* Convenient exporting to PDF and HTML
+* Callout blocks of varying colours
+* Linking
+* Tagging
+* Daily notes that I can write in currently, retrospectively, and in advance
+* Interpolation of both mathematical text and code
+* Embedding of code to be executed.
+
+Most of this came out of the box with Quarto, at least with some configuration.
+This plugin consists of support for that, along with other conveniences to
+better glue it all together.
+
+==============================================================================
+2. Setup                                                     *mbnotes-setup*
+
+Vim 9 is required for this plugin to work, since it is written in Vim9Script.
+
+This plugin can be installed using whatever plugin installer you so desire. It
+also depends on quarto-vim, which itself depends on vim-pandoc-syntax. For
+vim-plug >vim
+
+    Plug 'vim-pandoc/vim-pandoc-syntax'
+    Plug 'quarto-dev/quarto-vim'
+    Plug 'maxbucknell/vim-mbnotes'
+
+Please note that you must also set |g:mbnotes_dir|
+
+g:mbnotes_dir                                                *g:mbnotes_dir*
+
+This is the root directory of all notes. It must be set before any
+functionality can be used. If it is not set, the plugin will not start, and
+will echo an error message.
+
+Set in vimrc >vim
+
+    let g:mbnotes_dir = $HOME .. "/notes"
+
+This directory and a subdirectory `daily` will be created. The latter is used
+for storing daily notes. See |mbnotes-front-matter| for configuring rendering
+options.
+
+==============================================================================
+3. Configuration                                            *mbnotes-config*
+
+g:mbnotes_out_dir                                        *g:mbnotes_out_dir*
+
+This is where rendered outputs will be placed. By default this is a temporary
+directory, but it can be set manually. If the project `output-dir` is set in
+the Quarto project `_metadata.yml` like so:
+
+>yaml
+project
+    output-dir: _output
+<
+
+Then `g:mbnotes_out_dir` should be set accordingly:
+
+>vim
+    let g:mbnnotes_out_dir = g:mbnotes_dir .. "/_output"
+<
+
+g:mbnotes_open_daily_on_startup            *g:mbnotes_open_daily_on_startup*
+
+When launching Vim with no additional arguments, open the current daily note
+rather than the default Vim startup screen. Defaults to 0. Enable by: >vim
+
+    let g:mbnotes_open_daily_on_startup = 1
+
+g:mbnotes_new_day_time                              *g:mbnotes_new_day_time*
+
+Sets the time of day that a new day begins, as far as daily note designation is
+concerned. By default, a new day starts at 4am, but to start a new day at
+midnight, use >vim
+
+    let g:mbnotes_new_day_time = 0
+
+g:mbnotes_date_format_short                    *g:mbnotes_date_format_short*
+
+This date format is used in file names for new notes, and for daily notes. It
+is recommended to keep this as something that sorts alphabetically. This string
+should be something that can be passed to `strftime`. See `man 3 strftime` for
+more details.
+
+The default format outputs dates like "2023-09-21"
+
+>vim
+    let g:mbnotes_date_format_short = "%Y-%m-%d"
+<
+
+g:mbnotes_date_format_long                      *g:mbnotes_date_format_long*
+
+This date format is used to set the `date` metadata field in document front
+matter, as well as the title for daily notes. See |g:mbnotes_date_format_short|
+for formatting details.
+
+The default format outputs dates like "Thursday, 18 May 2024"
+
+>vim
+    let g:mbnotes_date_format_long = "%A, %-e %B %Y"
+<
+
+g:mbnotes_open_command                              *g:mbnotes_open_command*
+
+External command to open built files. By default, the following commands are
+tried (in order):
+
+* `open`
+* `xdg-open`
+
+If none of the above are defined, and this variable is not set explicitly, then
+the render commands (e.g. |:MBNotesRenderPDF|) will not open the output file
+after rendering.
+
+==============================================================================
+4. Commands                                               *mbnotes-commands*
+
+`:MBNotesNew`                                                  *:MBNotesNew*
+
+Creates a new note in the current window, with today's date in the file name.
+The date used rolls over at |g:mbnotes_new_day_time|.
+
+`:MBNotesNewSplit`                                        *:MBNotesNewSplit*
+
+The same as `:MBNotesNew`, but opens in a split. Can be controlled by modifier
+commands, such as `:above`.
+
+`:MBNotesOpenDaily`                                      *:MBNotesOpenDaily*
+
+Open the daily note in the current window. This command takes a single optional
+integer argument reprenting an offset. To open tomorrow's daily note >vim
+
+    :MBNotesOpenDaily 1
+
+Or to open last week's >vim
+
+    :MBNotesOpenDaily -7
+
+`:MBNotesOpenDailySplit`                            *:MBNotesOpenDailySplit*
+
+The same as `:MBNotesOpenDaily`, but opens in a split. Can be controlled by
+modifier commands, such as `:vertical`.
+
+`:MBNotesRenderPDF`                                      *:MBNotesRenderPDF*
+
+Render the current buffer as a PDF. It will open the PDF using
+`g:mbnotes_open_command` if it successfully builds.
+
+If the document fails to render, a terminal buffer is displayed showing the
+results of the quarto render command that was attempted.
+
+`:MBNotesRenderHTML`                                    *:MBNotesRenderHTML*
+
+Render the current buffer as an HTML file and open it. See |:MBNotesRenderPDF|
+for details on behaviour.
+
+==============================================================================
+5. Front Matter                                       *mbnotes-front-matter*
+
+Quarto supports a wide variety of configuration for document metadata. This can
+be placed in the document front matter, but it gets unwieldy. It is recommended
+that `g:mbnotes_dir` point to a Quarto project. Then, a file called
+`_metadata.yml` can be placed at the root.
+
+A good place to start is:
+
+>yaml
+author: "{Your Name}"
+format:
+    html:
+        embed-resources: true
+        html-math-method: katex
+        theme:
+            light: flatly
+            dark: darkly
+    pdf:
+        documentclass: article
+        geometry:
+            - top=30mm
+            - left=20mm
+            - heightrounded
+<
+
+Anything supported by Quarto can be specified here and will be imported and
+merged with any front matter specified at the top of any file. See the Quarto
+docs for more information, specifically on projects.
+
+ vim:tw=78:ts=8:noet:ft=help:norl:
