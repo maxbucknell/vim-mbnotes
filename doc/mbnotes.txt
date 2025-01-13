@@ -130,6 +130,8 @@ If none of the above are defined, and this variable is not set explicitly, then
 the render commands (e.g. |:MBNotesRenderPDF|) will not open the output file
 after rendering.
 
+Explicitly set this to the empty string to disable opening behaviour.
+
 g:mbnotes_rename_on_save                          *g:mbnotes_rename_on_save*
 
 This plugin will attempt to intelligently rename a note based on its title,
@@ -137,6 +139,38 @@ which is the first H1 that it finds in the document. Disable this behaviour by
 setting this variable to false >vim
 
     let g:mbnotes_rename_on_save = 0
+
+g:mbnotes_renderer_show                            *g:mbnotes_renderer_show*
+
+When a document is rendered, the quarto command to do so runs in a terminal
+buffer. If this variable is true, the terminal buffer will be visible. By
+default, the terminal buffer is not shown unless an error appears. >vim
+
+    let g:mbnotes_renderer_show = 1
+
+g:mbnotes_renderer_close_on_end            *g:mbnotes_renderer_close_on_end*
+
+If `g:mbnotes_renderer_show` is true, then automatically close the renderer
+buffer if it completes successfully.
+
+g:mbnotes_renderer_buffer_command        *g:mbnotes_renderer_buffer_command*
+
+The command that should be used to open the renderer buffer, at any time. This
+follows the default for terminal buffers opened by `term_start()` which is
+`botright sbuf`. For example: >vim
+
+    let g:mbnotes_renderer_buffer_command = "vertical sbuf"
+
+g:mbnotes_quarto_render_args                  *g:mbnotes_quarto_render_args*
+
+An array of extra arguments passed to the command used to render documents. For
+example, to always use the jupyter engine: >vim
+
+    let g:mbnotes_quarto_render_args = ["-M", "engine:jupyter"]
+
+g:mbnotes_quarto_binary                            *g:mbnotes_quarto_binary*
+
+Location of the quarto binary. By default, this uses whichever one is in $PATH.
 
 ==============================================================================
 4. Commands                                               *mbnotes-commands*

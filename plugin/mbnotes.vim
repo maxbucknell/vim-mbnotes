@@ -4,6 +4,14 @@ if exists("g:mbnotes_loaded")
     finish
 endif
 
+if !exists("g:mbnotes_renderer_show")
+    g:mbnotes_renderer_show = false
+endif
+
+if !exists("g:mbnotes_renderer_close_on_finish")
+    g:mbnotes_renderer_close_on_finish = true
+endif
+
 if !exists("g:mbnotes_dir")
     echoerr "MBNotes: Error: g:mbnotes_dir not set."
     finish
@@ -42,7 +50,19 @@ if !exists("g:mbnotes_date_format_long")
 endif
 
 if !exists("g:mbnotes_rename_on_save")
-    g:mbnotes_rename_on_save = 1
+    g:mbnotes_rename_on_save = true
+endif
+
+if !exists("g:mbnotes_quarto_binary")
+    g:mbnotes_quarto_binary = "quarto"
+endif
+
+if !exists("g:mbnotes_quarto_render_args")
+    g:mbnotes_quarto_render_args = []
+endif
+
+if !exists("g:mbnotes_renderer_buffer_command")
+    g:mbnotes_renderer_buffer_command = "botright sbuf"
 endif
 
 import autoload 'mbnotes.vim'

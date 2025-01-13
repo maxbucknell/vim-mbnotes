@@ -34,27 +34,34 @@ export def RenderNote(format: string, buffer = "%")
 
     def ExitCb(job: job, exit: number)
         if exit != 0
-            execute "botright sbuf " .. b:mbnotes_renderer_buffer
-        elseif exists("g:mbnotes_open_command")
-            execute "botright sbuf " .. b:mbnotes_renderer_buffer
-            execute "!" .. g:mbnotes_open_command .. " " .. output
-            execute "bwipeout " .. b:mbnotes_renderer_buffer
-        endif
+            if !g:mbnotes_renderer_show
+                execute g:mbnotes_renderer_buffer_command
+                    .. " " .. b:mbnotes_renderer_buffer
+            endif
+        else
+            if exists("g:mbnotes_open_command") && g:mbnotes_open_command != ""
+                execute "!" .. g:mbnotes_open_command .. " " .. output
+            endif
 
-        unlet b:mbnotes_renderer_buffer
+            if g:mbnotes_renderer_close_on_end
+                    && exists("b:mbnotes_renderer_buffer")
+                execute "bwipeout " .. b:mbnotes_renderer_buffer
+            endif
+        endif
     enddef
 
-    b:mbnotes_renderer_buffer = term_start([
-        "quarto",
-        "render",
-        input,
-        "--to",
-        format,
-        "--output-dir",
-        g:mbnotes_out_dir
-    ], {
+    var command = [
+        g:mbnotes_quarto_binary, "render", input,
+        "--to", format,
+        "--output-dir", g:mbnotes_out_dir
+    ] + g:mbnotes_quarto_render_args
+
+    # echo command
+
+    b:mbnotes_renderer_buffer = term_start(command, {
         cwd: g:mbnotes_dir,
-        hidden: true,
+        hidden: !g:mbnotes_renderer_show,
+        term_opencmd: g:mbnotes_renderer_buffer_command .. " %d",
         exit_cb: ExitCb
     })
 enddef
