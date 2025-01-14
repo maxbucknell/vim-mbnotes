@@ -100,4 +100,14 @@ command -nargs=0 MBNotesNewSplit {
     mbnotes.NewNote()
 }
 
+nnoremap <expr> <Plug>MBNotesNew <SID>mbnotes.Operator()
+xnoremap <expr> <Plug>MBNotesNew <SID>mbnotes.Operator()
+nnoremap <expr> <Plug>MBNotesNewLine <SID>mbnotes.Operator() .. '_'
+
+if !hasmapto('<Plug>MBNotesNew') || maparg('gb', 'n') ==# ''
+    nmap gb <Plug>MBNotesNew
+    xmap gb <Plug>MBNotesNew
+    nmap gbb <Plug>MBNotesNewLine
+endif
+
 g:mbnotes_loaded = 1

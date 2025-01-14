@@ -114,3 +114,75 @@ export def NewNote()
     var file = date .. "_new-note.qmd"
     execute "edit " .. g:mbnotes_dir .. "/" .. file
 enddef
+
+export def Operator(context = {}, type: string = ''): string
+    if type == ''
+        var _context = {
+            "dot_command": false,
+            "extend_block": '',
+            "virtualedit": [&l:virtualedit, &g:virtualedit]
+        }
+        &operatorfunc = function(Operator, [_context])
+        set virtualedit=block
+        return 'g@'
+    endif
+
+    var save = {
+        "clipboard": &clipboard,
+        "selection": &selection,
+        "virtualedit": [&l:virtualedit, &g:virtualedit],
+        "register": getreginfo('m'),
+        "visual_marks": [getpos("'<"), getpos("'>")]
+    }
+
+    try
+        set clipboard= selection=inclusive virtualedit=
+        var commands = {
+            "line": "'[V']",
+            "char": "`[v`]",
+            "block": "`[\<c-V>`]",
+        }[type]
+
+        var [_, _, col, off] = getpos("']")
+        if off != 0
+            var vcol = getline("'[")->strpart(0, col + off)->strdisplaywidth()
+
+            if vcol >= [line("'["), '$']->virtcol() - 1
+                context['extend_block'] = '$'
+            else
+                context['extend_block'] = vcol .. '|'
+            endif
+        endif
+
+        if context['extend_block'] != ''
+            commands ..= 'oO' .. context['extend_block']
+        endif
+
+        commands ..= '"my'
+
+        execute 'silent noautocmd keepjumps normal! ' .. commands
+
+        NewNote()
+
+        # normal! "mPG"_dd
+        normal! "mPG
+    finally
+        setreg('m', save['register'])
+        setpos("'<", save['visual_marks'][0])
+        setpos("'>", save['visual_marks'][1])
+        &clipboard = save['clipboard']
+        &selection = save['selection']
+
+        if context['dot_command']
+            &l:virtualedit = save['virtualedit'][0]
+            &g:virtualedit = save['virtualedit'][1]
+        else
+            &l:virtualedit = context['virtualedit'][0]
+            &g:virtualedit = context['virtualedit'][1]
+        endif
+
+        context['dot_command'] = true
+    endtry
+
+    return ""
+enddef

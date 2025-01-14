@@ -1,3 +1,11 @@
+# Pre-amble
+
+extends quarto, markdown, rmarkdown, pandoc
+
+priority -1
+
+# Header
+
 snippet note "Note Front Matter" b
 ---
 title: "${1:Title}"
@@ -8,6 +16,8 @@ date: "${3:`!v strftime(g:mbnotes_date_format_short, localtime() + (g:mbnotes_ne
 
 $0
 endsnippet
+
+# Callouts
 
 snippet :::n "Callout: Note" b
 ::: {.callout-note}
@@ -33,6 +43,8 @@ ${0:${VISUAL:text...}}
 :::
 endsnippet
 
+# Code
+
 snippet `r "R Code Block" b
 \`\`\`{r}
 ${1:#| output: ${2:false}}
@@ -55,15 +67,5 @@ ${1:#| output: ${2:false}}
 ${3:#| echo: ${4:false}}
 ${0:${VISUAL:# code...}}
 \`\`\`
-endsnippet
-
-snippet todo "Make a To-Do List!" b
-- [ ] ${0:What would you like to do..?}
-endsnippet
-
-snippet --- "Horizontal Rule" b
---------------------------------------------------------------------------------
-
-$0
 endsnippet
 
