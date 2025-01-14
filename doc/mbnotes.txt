@@ -7,7 +7,10 @@
     2. Setup ............................. |mbnotes-setup|
     3. Configuration ..................... |mbnotes-config|
     4. Commands .......................... |mbnotes-commands|
+        4.1. Operator .................... |mbnotes-operator|
     5. Front Matter ...................... |mbnotes-front-matter|
+    6. Integrations ...................... |mbnotes-integrations|
+        6.1. UltiSnips ................... |mbnotes-ultisnips|
 
 ==============================================================================
 1. Introduction                                                    *mbnotes*
@@ -215,6 +218,28 @@ Render the current buffer as an HTML file and open it. See |:MBNotesRenderPDF|
 for details on behaviour.
 
 ==============================================================================
+4.1 Operator                                              *mbnotes-operator*
+
+New notes can be created from any text within Vim. These will be put into a new
+note as created by `:MBNotesNew`, which will be opened.
+
+                                                                        *gb*
+gb{motion}	    Yank the text that {motion} moves over and put it into a
+		    new note buffer.
+
+                                                                       *gbb*
+gbb		    Yank the current line into a new note buffer.
+
+                                                                      *v_gb*
+{Visual}gb	    Yank the highlighted text into a new note buffer (for
+		    {Visual} see |Visual-mode|).
+
+These mappings are only set if `gb` is not already mapped to something. If they
+are, or if you wish to customise these mappings, create new normal and visual
+mode mappings (`nmap` and `xmap`) to `<Plug>MBNotesNew`, and a normal mode
+mapping to `<Plug>MBNotesNewLine`.
+
+==============================================================================
 5. Front Matter                                       *mbnotes-front-matter*
 
 Quarto supports a wide variety of configuration for document metadata. This can
@@ -244,5 +269,29 @@ format:
 Anything supported by Quarto can be specified here and will be imported and
 merged with any front matter specified at the top of any file. See the Quarto
 docs for more information, specifically on projects.
+
+==============================================================================
+6. Integrations                                       *mbnotes-integrations*
+
+There are many different plugins that I use to help my notes work better. I
+have packaged some of the integrations in this plugin, such that they will load
+if those plugin are installed.
+
+==============================================================================
+6.1. Snippets                                            *mbnotes-ultisnips*
+
+This plugin packages a few UltiSnips snippets out of the box. These facilitate
+creating Quarto front matter with a date and title, callout blocks (as per the
+Quarto documentation), and fenced code blocks that Quarto will execute.
+
+If you use UltiSnips and would not like these, create a file called
+`mbnotes.snippets` in your snippets directory, and include a line: >snippets
+
+    clearsnippets
+
+The snippets vended by this plugin are at priority -1, so should be cleared by
+a default priority instruction. Furthermore, any of these snippets can be very
+easily overwritten. See the `priority` keyword in |ultisnips-basic-syntax| for
+more information.
 
  vim:tw=78:ts=8:noet:ft=help:norl:
