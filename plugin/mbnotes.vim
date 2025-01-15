@@ -65,6 +65,17 @@ if !exists("g:mbnotes_renderer_buffer_command")
     g:mbnotes_renderer_buffer_command = "botright sbuf"
 endif
 
+if !exists("g:mbnotes_search_command")
+    g:mbnotes_search_command = "rg "
+        .. "--column "
+        .. "--line-number "
+        .. "--no-heading "
+        .. "--color=always "
+        .. "--smart-case "
+        .. "--glob='**/*.qmd' "
+        .. "-- "
+endif
+
 import autoload 'mbnotes.vim'
 
 augroup MBNotes
@@ -85,14 +96,14 @@ augroup MBNotes
     .. fnameescape(g:mbnotes_dir) .. "/*.qmd mbnotes.AfterNoteSave()"
 augroup END
 
-command -nargs=? MBNotesOpenDaily mbnotes.OpenDailyNote(<args>)
-command -nargs=? MBNotesOpenDailySplit {
+command -nargs=? MBNotesDaily mbnotes.OpenDailyNote(<args>)
+command -nargs=? MBNotesDailySplit {
     execute "<mods> new"
     mbnotes.OpenDailyNote(<args>)
 }
 
-command -nargs=0 MBNotesRenderPDF mbnotes.RenderNote("pdf")
-command -nargs=0 MBNotesRenderHTML mbnotes.RenderNote("html")
+command -nargs=0 MBNotesPDF mbnotes.RenderNote("pdf")
+command -nargs=0 MBNotesHTML mbnotes.RenderNote("html")
 
 command -nargs=0 MBNotesNew mbnotes.NewNote()
 command -nargs=0 MBNotesNewSplit {
@@ -104,10 +115,17 @@ nnoremap <expr> <Plug>MBNotesNew <SID>mbnotes.Operator()
 xnoremap <expr> <Plug>MBNotesNew <SID>mbnotes.Operator()
 nnoremap <expr> <Plug>MBNotesNewLine <SID>mbnotes.Operator() .. '_'
 
-if !hasmapto('<Plug>MBNotesNew') || maparg('gb', 'n') ==# ''
-    nmap gb <Plug>MBNotesNew
-    xmap gb <Plug>MBNotesNew
-    nmap gbb <Plug>MBNotesNewLine
-endif
+command -nargs=? -bang MBNotes fzf#run(fzf#wrap('MBNotes', {
+            \ "options": ["--query", ".qmd$ " .. <q-args>],
+            \ "dir": g:mbnotes_dir
+            \ }, <bang>0))
+
+command -nargs=? -bang MBNotesSearch fzf#vim#grep(
+            \ g:mbnotes_search_command .. shellescape(<q-args>),
+            \ fzf#vim#with_preview({
+            \   "dir": g:mbnotes_dir
+            \ }), <bang>0)
+
+command -nargs=? -bang MBNotesTags mbnotes.SearchForTags(<q-args>, <bang>0)
 
 g:mbnotes_loaded = 1

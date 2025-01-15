@@ -186,3 +186,19 @@ export def Operator(context = {}, type: string = ''): string
 
     return ""
 enddef
+
+export def SearchForTags(tag = '', bang = false)
+    var query = '#' .. tag
+
+    if query ==# '#'
+        query ..= '[a-zA-Z_]'
+    endif
+
+    fzf#vim#grep(
+        g:mbnotes_search_command .. shellescape(query),
+        fzf#vim#with_preview({
+            "dir": g:mbnotes_dir
+        }),
+        bang
+    )
+enddef

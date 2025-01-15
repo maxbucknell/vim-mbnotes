@@ -5,12 +5,17 @@
 
     1. Introduction ...................... |mbnotes|
     2. Setup ............................. |mbnotes-setup|
-    3. Configuration ..................... |mbnotes-config|
-    4. Commands .......................... |mbnotes-commands|
-        4.1. Operator .................... |mbnotes-operator|
-    5. Front Matter ...................... |mbnotes-front-matter|
+        2.1. Installation ................ |mbnotes-install|
+        2.2. Quarto Project .............. |mbnotes-quarto-project|
+    3. Creating Notes .................... |mbnotes-creating|
+        3.1. New Notes ................... |mbnotes-new|
+        3.2. Daily Notes ................. |mbnotes-daily|
+        3.3. Extracting Notes ............ |mbnotes-extracting|
+    4. Rendering Notes ................... |mbnotes-rendering|
+    5. Configuration ..................... |mbnotes-config|
     6. Integrations ...................... |mbnotes-integrations|
         6.1. UltiSnips ................... |mbnotes-ultisnips|
+        6.2. FZF ......................... |mbnotes-fzf|
 
 ==============================================================================
 1. Introduction                                                    *mbnotes*
@@ -37,6 +42,9 @@ better glue it all together.
 
 Vim 9 is required for this plugin to work, since it is written in Vim9Script.
 
+
+2.1. Installation                                     *mbnotes-installation*
+
 This plugin can be installed using whatever plugin installer you so desire. It
 also depends on quarto-vim, which itself depends on vim-pandoc-syntax. For
 vim-plug >vim
@@ -61,21 +69,139 @@ This directory and a subdirectory `daily` will be created. The latter is used
 for storing daily notes. See |mbnotes-front-matter| for configuring rendering
 options.
 
+2.2. Quarto Project                                 *mbnotes_quarto_project*
+
+While MBNotes supports `g:mbnotes_dir` pointing at any directory, it is
+recommended that this be configured to be a Quarto project, of type "default".
+There are a couple of benefits here:
+
+Firstly, having a project allows metadata to be specified outside of a single
+note's front matter, meaning that consistent rendering can be achieved without
+cluttering up your documents. To do this, create a file "_quarto.yml" in
+`g:mbnotes_dir`. I find this is a good place to start
+
+>yaml
+author: "{Your Name}"
+format:
+    html:
+        embed-resources: true
+        html-math-method: katex
+        theme:
+            light: flatly
+            dark: darkly
+    pdf:
+        documentclass: article
+        geometry:
+            - top=25mm
+            - left=25mm
+            - heightrounded
+<
+
+Another benefit is that the output directory can be set inside "_quarto.yml",
+and all build artifacts will be kept in one location. If this change is made,
+please note that `g:mbnotes_out_dir` will also need to be updated to match.
+This gives a convenient location to find built resources, as well as utilise
+the caching features of Quarto.
+
 ==============================================================================
-3. Configuration                                            *mbnotes-config*
+3. Creating Notes                                         *mbnotes-creating*
+
+3.1. New Notes                                                 *mbnotes-new*
+
+`:MBNotesNew`                                                  *:MBNotesNew*
+
+Creates a new note in the current window, with today's date in the file name.
+The date used rolls over at |g:mbnotes_new_day_time|.
+
+When this note is saved, it will expect to find at least one h1 element. If it
+does, the file will be renamed with a sanitised version of that title. If it
+does not, an error is thrown. Control this behaviour with
+`g:mbnotes_rename_on_save`.
+
+`:MBNotesNewSplit`                                        *:MBNotesNewSplit*
+
+The same as `:MBNotesNew`, but opens in a split. Can be controlled by modifier
+commands, such as `:above`.
+
+3.2. Daily Notes                                             *mbnotes-daily*
+
+MBNotes includes a daily note that can be used as a scratch pad, journal, or
+really anything. If the flag `g:mbnotes_open_daily_on_startup` is enabled, this
+daily note will open when Vim is opened. If it does not:
+
+`:MBNotesDaily`                                              *:MBNotesDaily*
+
+Open a daily note in the current window. By default, this will open today's
+note. However,  this command takes a single optional integer argument
+reprenting an offset. To open tomorrow's daily note >vim
+
+    :MBNotesDaily 1
+
+Or to open last week's >vim
+
+    :MBNotesDaily -7
+
+`:MBNotesDailySplit`                                    *:MBNotesDailySplit*
+
+The same as `:MBNotesDaily`, but opens in a split. Can be controlled by
+modifier commands, such as `:vertical`.
+
+3.3. Extracting Notes                                   *mbnotes-extracting*
+
+New notes can be created from any text within Vim. These will be put into a new
+note as created by `:MBNotesNew`, which will be opened.
+
+                                                                        *gb*
+<Plug>MBNotesNew{motion}	Yank the text that {motion} moves over and put
+				it into a new note buffer.
+
+                                                                       *gbb*
+<Plug>MBNotesNewLine{motion}	Yank the current line into a new note buffer.
+
+                                                                      *v_gb*
+{Visual}<Plug>MBNotesNew	Yank the highlighted text into a new note buffer
+				(for {Visual} see |Visual-mode|).
+
+These are not mapped to anything usable by default. To use these operators,
+choose a suitable key sequence, and set it:
+
+>vim
+    nmap gb <Plug>MBNotesNew
+    xmap gb <Plug>MBNotesNew
+    nmap gbb <Plug>MBNotesNewLine
+<
+
+==============================================================================
+4. Rendering Notes                                       *mbnotes-rendering*
+
+Notes are normal Quarto documents, and as such can be rendered by Quarto into
+anything. We include commands to render and open PDFs and HTML files. Rendering
+can be customised by setting `g:mbnotes_quarto_binary` and
+`g:mbnotes_quarto_render_args`.
+
+`:MBNotesPDF`                                                  *:MBNotesPDF*
+
+Render the current buffer as a PDF. It will open the PDF using
+`g:mbnotes_open_command` if it successfully builds.
+
+If the document fails to render, a terminal buffer is displayed showing the
+results of the quarto render command that was attempted. To control when and
+how a the terminal buffer showing rendering information is displayed, see
+`g:mbnotes_renderer_show`, `g:mbnotes_renderer_close_on_end`, and
+`g:mbnotes_renderer_buffer_command`.
+
+`:MBNotesRenderHTML`                                    *:MBNotesRenderHTML*
+
+Render the current buffer as an HTML file and open it. See |:MBNotesRenderPDF|
+for details on behaviour.
+
+==============================================================================
+5. Configuration                                            *mbnotes-config*
 
 g:mbnotes_out_dir                                        *g:mbnotes_out_dir*
 
 This is where rendered outputs will be placed. By default this is a temporary
-directory, but it can be set manually. If the project `output-dir` is set in
-the Quarto project `_metadata.yml` like so:
-
->yaml
-project
-    output-dir: _output
-<
-
-Then `g:mbnotes_out_dir` should be set accordingly:
+directory, but it can be set manually.
 
 >vim
     let g:mbnnotes_out_dir = g:mbnotes_dir .. "/_output"
@@ -121,6 +247,10 @@ The default format outputs dates like "Thursday, 18 May 2024"
     let g:mbnotes_date_format_long = "%A, %-e %B %Y"
 <
 
+g:mbnotes_quarto_binary                            *g:mbnotes_quarto_binary*
+
+Location of the quarto binary. By default, this uses whichever one is in $PATH.
+
 g:mbnotes_open_command                              *g:mbnotes_open_command*
 
 External command to open built files. By default, the following commands are
@@ -130,18 +260,10 @@ tried (in order):
 * `xdg-open`
 
 If none of the above are defined, and this variable is not set explicitly, then
-the render commands (e.g. |:MBNotesRenderPDF|) will not open the output file
+the render commands (e.g. `:MBNotesPDF`) will not open the output file
 after rendering.
 
 Explicitly set this to the empty string to disable opening behaviour.
-
-g:mbnotes_rename_on_save                          *g:mbnotes_rename_on_save*
-
-This plugin will attempt to intelligently rename a note based on its title,
-which is the first H1 that it finds in the document. Disable this behaviour by
-setting this variable to false >vim
-
-    let g:mbnotes_rename_on_save = 0
 
 g:mbnotes_renderer_show                            *g:mbnotes_renderer_show*
 
@@ -171,104 +293,16 @@ example, to always use the jupyter engine: >vim
 
     let g:mbnotes_quarto_render_args = ["-M", "engine:jupyter"]
 
-g:mbnotes_quarto_binary                            *g:mbnotes_quarto_binary*
+g:mbnotes_rename_on_save                          *g:mbnotes_rename_on_save*
 
-Location of the quarto binary. By default, this uses whichever one is in $PATH.
+This plugin will attempt to intelligently rename a note based on its title,
+which is the first H1 that it finds in the document. Disable this behaviour by
+setting this variable to false >vim
 
-==============================================================================
-4. Commands                                               *mbnotes-commands*
+    let g:mbnotes_rename_on_save = 0
 
-`:MBNotesNew`                                                  *:MBNotesNew*
-
-Creates a new note in the current window, with today's date in the file name.
-The date used rolls over at |g:mbnotes_new_day_time|.
-
-`:MBNotesNewSplit`                                        *:MBNotesNewSplit*
-
-The same as `:MBNotesNew`, but opens in a split. Can be controlled by modifier
-commands, such as `:above`.
-
-`:MBNotesOpenDaily`                                      *:MBNotesOpenDaily*
-
-Open the daily note in the current window. This command takes a single optional
-integer argument reprenting an offset. To open tomorrow's daily note >vim
-
-    :MBNotesOpenDaily 1
-
-Or to open last week's >vim
-
-    :MBNotesOpenDaily -7
-
-`:MBNotesOpenDailySplit`                            *:MBNotesOpenDailySplit*
-
-The same as `:MBNotesOpenDaily`, but opens in a split. Can be controlled by
-modifier commands, such as `:vertical`.
-
-`:MBNotesRenderPDF`                                      *:MBNotesRenderPDF*
-
-Render the current buffer as a PDF. It will open the PDF using
-`g:mbnotes_open_command` if it successfully builds.
-
-If the document fails to render, a terminal buffer is displayed showing the
-results of the quarto render command that was attempted.
-
-`:MBNotesRenderHTML`                                    *:MBNotesRenderHTML*
-
-Render the current buffer as an HTML file and open it. See |:MBNotesRenderPDF|
-for details on behaviour.
-
-==============================================================================
-4.1 Operator                                              *mbnotes-operator*
-
-New notes can be created from any text within Vim. These will be put into a new
-note as created by `:MBNotesNew`, which will be opened.
-
-                                                                        *gb*
-gb{motion}	    Yank the text that {motion} moves over and put it into a
-		    new note buffer.
-
-                                                                       *gbb*
-gbb		    Yank the current line into a new note buffer.
-
-                                                                      *v_gb*
-{Visual}gb	    Yank the highlighted text into a new note buffer (for
-		    {Visual} see |Visual-mode|).
-
-These mappings are only set if `gb` is not already mapped to something. If they
-are, or if you wish to customise these mappings, create new normal and visual
-mode mappings (`nmap` and `xmap`) to `<Plug>MBNotesNew`, and a normal mode
-mapping to `<Plug>MBNotesNewLine`.
-
-==============================================================================
-5. Front Matter                                       *mbnotes-front-matter*
-
-Quarto supports a wide variety of configuration for document metadata. This can
-be placed in the document front matter, but it gets unwieldy. It is recommended
-that `g:mbnotes_dir` point to a Quarto project. Then, a file called
-`_metadata.yml` can be placed at the root.
-
-A good place to start is:
-
->yaml
-author: "{Your Name}"
-format:
-    html:
-        embed-resources: true
-        html-math-method: katex
-        theme:
-            light: flatly
-            dark: darkly
-    pdf:
-        documentclass: article
-        geometry:
-            - top=30mm
-            - left=20mm
-            - heightrounded
-<
-
-Anything supported by Quarto can be specified here and will be imported and
-merged with any front matter specified at the top of any file. See the Quarto
-docs for more information, specifically on projects.
+It is not recommended to disable this without some other way of generating file
+names.
 
 ==============================================================================
 6. Integrations                                       *mbnotes-integrations*
@@ -278,7 +312,7 @@ have packaged some of the integrations in this plugin, such that they will load
 if those plugin are installed.
 
 ==============================================================================
-6.1. Snippets                                            *mbnotes-ultisnips*
+6.1. UltiSnips                                           *mbnotes-ultisnips*
 
 This plugin packages a few UltiSnips snippets out of the box. These facilitate
 creating Quarto front matter with a date and title, callout blocks (as per the
@@ -293,5 +327,29 @@ The snippets vended by this plugin are at priority -1, so should be cleared by
 a default priority instruction. Furthermore, any of these snippets can be very
 easily overwritten. See the `priority` keyword in |ultisnips-basic-syntax| for
 more information.
+
+==============================================================================
+6.2. FZF                                                       *mbnotes-fzf*
+
+A few commands are packaged that use FZF to open and search your notes.
+
+`:MBNotes`                                                        *:MBNotes*
+
+Lists all notes.
+
+More specifically, all files within `g:mbnotes_dir`. The query is prefilled
+with ".qmd$" to only find Quarto files.
+
+`:MBNotesSearch [PATTERN]`                                  *:MBNotesSearch*
+
+Search all notes for the given pattern.
+
+By default, this command depends on ripgrep being installed. The underlying
+search query can be changed by setting `g:mbnotes_search_command`. [PATTERN] is
+appended to that command.
+
+`:MBNotesTags [TAG]`                                          *:MBNotesTags*
+
+Search all notes for a given tag using `g:mbnotes_search_command`.
 
  vim:tw=78:ts=8:noet:ft=help:norl:
