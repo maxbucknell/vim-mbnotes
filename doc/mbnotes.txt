@@ -16,6 +16,7 @@
     6. Integrations ...................... |mbnotes-integrations|
         6.1. UltiSnips ................... |mbnotes-ultisnips|
         6.2. FZF ......................... |mbnotes-fzf|
+        6.3. Asyncomplete ................ mbnotes-asyncomplete
 
 ==============================================================================
 1. Introduction                                                    *mbnotes*
@@ -351,5 +352,21 @@ appended to that command.
 `:MBNotesTags [TAG]`                                          *:MBNotesTags*
 
 Search all notes for a given tag using `g:mbnotes_search_command`.
+
+==============================================================================
+6.3. Asyncomplete                                     *mbnotes-asyncomplete*
+
+Completion is supported via asyncomplete, for links to other notes. To enable
+this, include:
+
+>vim
+    autocmd User asyncomplete_setup {
+        asyncomplete#register_source(
+            asyncomplete#sources#mbnotes#get_source_options({ 'priority': 9 })
+        )
+    }
+<
+
+This completion support depends on ripgrep being installed.
 
  vim:tw=78:ts=8:noet:ft=help:norl:
