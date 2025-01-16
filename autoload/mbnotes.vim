@@ -40,7 +40,7 @@ export def RenderNote(format: string, buffer = "%")
             endif
         else
             if exists("g:mbnotes_open_command") && g:mbnotes_open_command != ""
-                execute "!" .. g:mbnotes_open_command .. " " .. output
+                execute "!" .. g:mbnotes_open_command .. " " .. shellescape(output)
             endif
 
             if g:mbnotes_renderer_close_on_end

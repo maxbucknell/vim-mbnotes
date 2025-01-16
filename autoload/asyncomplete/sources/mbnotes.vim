@@ -2,7 +2,7 @@ function! asyncomplete#sources#mbnotes#get_source_options(opts)
     let l:defaults = {
                 \ 'name': 'mbnotes',
                 \ 'completor': function('asyncomplete#sources#mbnotes#completor'),
-                \ 'allowlist': ['mbnotes.qmd']
+                \ 'allowlist': ['mbnotes.quarto']
                 \ }
 
     return extend(l:defaults, a:opts)
@@ -47,8 +47,6 @@ function! asyncomplete#sources#mbnotes#completor(opt, ctx)
 
     let l:link_pattern = '\]([^)]*$'
     let l:link = matchstr(a:ctx['typed'], l:link_pattern)
-
-    echom l:link .. " | " .. a:ctx['typed']
 
     if l:link !=# ''
         if localtime() > s:notes_ttl
