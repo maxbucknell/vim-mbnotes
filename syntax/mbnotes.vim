@@ -1,6 +1,5 @@
-vim9s
-
 if exists("b:current_syntax")
+    echom b:current_syntax
     finish
 endif
 
@@ -17,9 +16,7 @@ syn region mbnCalloutImportant start=":::\s\+{\.callout-important\s*" end=":::$"
 hi link mbnCalloutImportant SpellBad
 
 syn region mbnCalloutTip start=":::\s\+{\.callout-tip\s*" end=":::$" keepend
-hi link mbnCalloutNote Question
+hi link mbnCalloutTip Question
 
 syn region mbnCalloutCaution start=":::\s\+{\.callout-caution\s*" end=":::$" keepend
-hi link mbnCalloutWarning SpellCap
-
-b:current_syntax = "mbnotes"
+hi link mbnCalloutCaution SpellCap

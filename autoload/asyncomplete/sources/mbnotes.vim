@@ -2,7 +2,7 @@ function! asyncomplete#sources#mbnotes#get_source_options(opts)
     let l:defaults = {
                 \ 'name': 'mbnotes',
                 \ 'completor': function('asyncomplete#sources#mbnotes#completor'),
-                \ 'allowlist': ['mbnotes.quarto']
+                \ 'allowlist': ['mbnotes']
                 \ }
 
     return extend(l:defaults, a:opts)
