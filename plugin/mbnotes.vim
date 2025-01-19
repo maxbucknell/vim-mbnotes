@@ -16,7 +16,7 @@ if !exists("g:mbnotes_dir")
     echoerr "MBNotes: Error: g:mbnotes_dir not set."
     finish
 else
-    silent mkdir(fnameescape(g:mbnotes_dir .. "/daily"), "p")
+    silent mkdir(g:mbnotes_dir .. "/daily", "p")
 endif
 
 if !exists("g:mbnotes_out_dir")

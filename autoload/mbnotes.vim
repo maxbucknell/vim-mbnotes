@@ -68,10 +68,11 @@ enddef
 
 export def BeforeNoteSave()
     var full_path = expand('%:p')
+    var directory = expand('%:p:h')
     var daily_path = g:mbnotes_dir .. "/daily"
 
-    # Don't touch daily notes
-    if g:mbnotes_rename_on_save && daily_path != full_path[0 : len(daily_path) - 1]
+    # Only rename bona fide notes
+    if directory != expand(g:mbnotes_dir)
         var base = expand('%:t')
         var date = base[0 : 9]
 
@@ -83,7 +84,7 @@ export def BeforeNoteSave()
         var title_line = search('^#\s\+')
 
         if title_line == 0
-            throw "Unable to save note: No title found."
+            return
         endif
 
         var title = substitute(getline(title_line), '^#\s\+', '', '')
@@ -97,13 +98,14 @@ export def BeforeNoteSave()
         normal! `s
         setpos("'s", original_mark)
 
-        b:new_name = date .. "_" .. sanitised .. ".qmd"
+        b:new_name = fnameescape(expand('%:p:h')) .. "/" .. date .. "_" .. sanitised .. ".qmd"
     endif
 enddef
 
 export def AfterNoteSave()
     if exists("b:new_name")
-        execute "silent Move " .. fnameescape(g:mbnotes_dir) .. "/" .. b:new_name
+        execute "silent Move " .. b:new_name
+        unlet b:new_name
     endif
 enddef
 

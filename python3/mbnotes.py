@@ -1,12 +1,7 @@
 import vim
 from string import Template
 from datetime import datetime, timedelta
-daily_template = Template("""---
-title: "Daily Note"
-date: "$date"
----
-
-# $date
+daily_template = Template("""# $date
 
 ## Daily Note
 
